@@ -1,0 +1,26 @@
+[build]
+target-dir = "target"
+
+[submit_via_binary]
+submit_via_binary = true
+
+[dependencies]
+proconio = { version = "0.3.6", features = ["derive"] }
+
+[project]
+# to create `rust-toolchain` file, uncomment this line.
+# rustc_version = "1.15.1"
+
+# source code template
+template = """
+use proconio::{fastout, input};
+
+#[fastout]
+fn main() {
+    input! {
+        r: f64,
+    }
+    println!("{}", 2.0 * r * std::f64::consts::PI);
+}
+"""
+
