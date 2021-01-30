@@ -1,6 +1,10 @@
 [build]
 target-dir = "target"
 
+[profile]
+# target to use to generate binary
+target = "x86_64-unknown-linux-musl"
+
 [submit_via_binary]
 submit_via_binary = true
 
