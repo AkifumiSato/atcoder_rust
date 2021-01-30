@@ -1,44 +1,93 @@
 use proconio::{fastout, input};
 
-// todo dish struct add, mut `ball`
-// todo loop by choice
+#[derive(Debug, Clone)]
+struct Pattern {
+    dished_id_list: Vec<i32>
+}
+
+impl Pattern {
+    fn new(id: i32) -> Pattern {
+        Pattern {
+            dished_id_list: vec![id],
+        }
+    }
+
+    fn clone_and_add_ball(&self, ball_id: i32) -> Pattern {
+        let mut dished_id_list = self.dished_id_list.clone();
+        if !dished_id_list.contains(&ball_id) {
+            dished_id_list.push(ball_id);
+        }
+        Pattern {
+            dished_id_list,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct CalcResult {
+    patterns: Vec<Pattern>
+}
+
+impl CalcResult {
+    fn new() -> CalcResult {
+        CalcResult {
+            patterns: vec![],
+        }
+    }
+
+    fn add_initial_pattern(&mut self, id1: i32, id2: i32) {
+        self.patterns.push(Pattern::new(id1));
+        self.patterns.push(Pattern::new(id2));
+    }
+
+    fn add_tail_patterns(&mut self, id: i32) {
+        let patterns = self.patterns
+            .iter()
+            .map(|p| p.clone_and_add_ball(id))
+            .collect::<Vec<Pattern>>();
+        self.patterns = patterns;
+    }
+
+    fn merge_pattern(&mut self, target: &mut CalcResult) {
+        self.patterns.append(&mut target.patterns);
+    }
+}
 
 #[fastout]
 fn main() {
     input! {
         n: i32,
-        m: i32,
-        cond: [(i32, i32); n],
+        _m: i32,
+        _cond: [(i32, i32); n],
         k: i32,
         choice: [(i32, i32); k],
     }
 
-    /// ボールを置くパターンを網羅して羅列する
-    /// それにはまず「前の質問までの配列を2倍にして置く皿IDを末尾にそれぞれ足す」
-    /// をchoiceがなくなるまでやる
-    /// Boxにしてここにパターンを表すvecのboxをため込んでいく
-    let mut patterns: Vec<&mut Vec<i32>> = vec![];
-    for i in 0..k-1 {
+    // ボールを置くパターンを網羅して羅列する
+    // それにはまず「前の質問までの配列を2倍にして置く皿IDを末尾にそれぞれ足す」
+    // をchoiceがなくなるまでやる
+    let mut result = CalcResult::new();
+    for i in 0..k {
         if i == 0 {
-            let case = choice.get(i as usize).unwrap();
-            let mut case_0 = vec![case.0];
-            let mut case_1 = vec![case.1];
-            patterns.push(&mut case_0);
-            patterns.push(&mut case_1);
+            let case = choice.get(0).unwrap();
+            result.add_initial_pattern(case.0, case.1);
         } else {
-            // let tmp_patterns = patterns.clone();
+            let mut cloned_result = result.clone();
+            //     .iter()
+            //     .clone()
+            //     .map(|x| x.clone())
+            //     .collect::<Vec<Pattern>>();
+            let case = choice.get(i as usize).unwrap();
 
-            // pattern1
-            for accum in patterns.iter_mut() {
-                let current = choice.get(i as usize).unwrap();
-                accum.push(current.clone().0);
-            }
+            // 前半部分にcase.0を追加
+            result.add_tail_patterns(case.0);
 
-            // pattern2
+            // 後半部分にcase.1を追加
+            cloned_result.add_tail_patterns(case.1);
+            result.merge_pattern(&mut cloned_result);
         }
     }
 
-    println!("{:?}", patterns);
-    // println!("{:?}", cond);
-    // println!("{:?}", choice);
+    // todo 条件を満たしているか検査
+    println!("{:?}", output);
 }
